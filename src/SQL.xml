@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+       Copyright 2009-2016 the original author or authors.
+
+       Licensed under the Apache License, Version 2.0 (the "License");
+       you may not use this file except in compliance with the License.
+       You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+       Unless required by applicable law or agreed to in writing, software
+       distributed under the License is distributed on an "AS IS" BASIS,
+       WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+       See the License for the specific language governing permissions and
+       limitations under the License.
+
+-->
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="SQL">
+
+
+    <resultMap type="Message" id="UserResult">
+        <id column="id" jdbcType="VARCHAR" property="id"/>
+        <result column="command" jdbcType="VARCHAR" property="command"/>
+        <result column="description" jdbcType="VARCHAR" property="description"/>
+        <result column="content" jdbcType="VARCHAR" property="content"/>
+    </resultMap>
+
+    <select id="getUser" parameterType="bean.Queryvo" resultMap="UserResult">
+        SELECT * FROM micro_message
+        <where>
+            <!--<if test="message!=null">-->
+                <!--and id=#{message.id}-->
+            <!--</if>-->
+            <if test="ids!=null">
+                <foreach collection="ids" item="user_id" open="and (" close=")" separator="or">
+                  id=#{user_id}
+                </foreach>
+            </if>
+
+        </where>
+    </select>
+    <select id="getuserbycommand" parameterType="String" resultMap="UserResult">
+        SELECT * FROM micro_message WHERE command=#{command}
+    </select>
+    <insert id="insertuser" parameterType="bean.Message">
+        /*
+        SELECT LAST _INSERT _ID():得到刚插入进去的记录的主键值
+        keyProperty：将查询到的主键值设置到parameterType指定的对象中
+        order：相对于insert语句来说是他的执行顺序
+        */
+        <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Integer">
+          SELECT LAST _INSERT _ID()
+        </selectKey>
+        INSERT INTO micro_message (id,command,description,content)VALUES(#{id},#{command},#{description},#{content})
+    </insert>
+    <delete id="deleteuser" parameterType="java.lang.Integer">
+      DELETE from micro_message WHERE id=#{id}
+    </delete>
+    <update id="updateuser" parameterType="bean.Message">
+        UPDATE micro_message SET id=#{id},command=#{command},description=#{description},content=#{content} WHERE id=#{id}
+    </update>
+</mapper>
